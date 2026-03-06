@@ -1,0 +1,124 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { getCategories, getProducts } from '../api/productApi';
+import ProductCard from '../components/ui/ProductCard';
+import Spinner from '../components/ui/Spinner';
+import { useShop } from '../context/ShopContext';
+
+export default function ProductListing() {
+  const { shop } = useShop();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const search = searchParams.get('search') || '';
+  const categoryId = searchParams.get('category_id') || '';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+
+  useEffect(() => {
+    if (!shop) return;
+    getCategories(shop.id).then((r) => setCategories(r.data.data || []));
+  }, [shop]);
+
+  useEffect(() => {
+    if (!shop) return;
+    setLoading(true);
+    getProducts(shop.id, { search, category_id: categoryId || undefined, page, per_page: 12 })
+      .then((r) => {
+        setProducts(r.data.data || []);
+        setMeta(r.data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [shop, search, categoryId, page]);
+
+  function setParam(key, val) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (val) next.set(key, val); else next.delete(key);
+      next.delete('page');
+      return next;
+    });
+  }
+
+  function goPage(p) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('page', p);
+      return next;
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">Products</h1>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="Search products..."
+          defaultValue={search}
+          onKeyDown={(e) => { if (e.key === 'Enter') setParam('search', e.target.value); }}
+          onBlur={(e) => setParam('search', e.target.value)}
+          className="border border-slate-200 rounded-lg px-4 py-2.5 text-sm flex-1 focus:outline-none focus:ring-2 focus:border-transparent"
+          style={{ '--tw-ring-color': 'var(--color-primary)' }}
+        />
+
+        {/* Category filter */}
+        <select
+          value={categoryId}
+          onChange={(e) => setParam('category_id', e.target.value)}
+          className="border border-slate-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none"
+        >
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Results */}
+      {loading ? (
+        <div className="flex justify-center py-20"><Spinner size="lg" /></div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-20 text-slate-400">
+          <p className="text-5xl mb-3">🔍</p>
+          <p>No products found.</p>
+          <button onClick={() => setSearchParams({})} className="mt-4 btn-outline text-sm">Clear filters</button>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {products.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+
+          {/* Pagination */}
+          {meta && meta.last_page > 1 && (
+            <div className="flex justify-center gap-2 mt-8">
+              {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => goPage(p)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition ${
+                    p === meta.current_page
+                      ? 'text-white border-transparent'
+                      : 'border-slate-200 text-slate-600 hover:border-primary hover:text-primary'
+                  }`}
+                  style={p === meta.current_page ? { backgroundColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' } : {}}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
