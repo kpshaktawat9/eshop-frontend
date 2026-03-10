@@ -57,41 +57,54 @@ export default function OrderTracking() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Track Your Order</h1>
+      <h1 className="text-2xl font-bold text-slate-800 mb-2">Track Your Order</h1>
+      <p className="text-slate-400 text-sm mb-7">Enter your order number to see the latest status.</p>
 
       <form onSubmit={handleSearch} className="flex gap-2 mb-8">
-        <input
-          type="text"
-          value={number}
-          onChange={(e) => setNumber(e.target.value)}
-          placeholder="Enter your order number (e.g. ABCD-1234567890)"
-          className="flex-1 border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
-        />
+        <div className="relative flex-1">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            placeholder="e.g. ABCD-1234567890"
+            className="input-field pl-9"
+          />
+        </div>
         <button type="submit" className="btn-primary px-5">Track</button>
       </form>
 
-      {loading && <div className="flex justify-center"><Spinner size="lg" /></div>}
+      {loading && <div className="flex justify-center py-10"><Spinner size="lg" /></div>}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 text-sm">{error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 text-sm flex items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {error}
+        </div>
       )}
 
       {order && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-100">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs text-slate-400">Order Number</p>
-                <p className="font-bold font-mono text-slate-800">{order.order_number}</p>
-              </div>
-              <span className={`badge ${statusBadge(order.status)} capitalize`}>{order.status}</span>
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
+          <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Order Number</p>
+              <p className="font-bold font-mono text-slate-800">{order.order_number}</p>
             </div>
+            <span className={`badge ${statusBadge(order.status)} capitalize`}>{order.status}</span>
           </div>
 
-          {/* Progress */}
+          {/* Progress tracker */}
           {order.status !== 'cancelled' && (
-            <div className="p-5 border-b border-slate-100">
-              <div className="flex items-center gap-0">
+            <div className="px-5 py-6 border-b border-slate-100">
+              <div className="flex items-center">
                 {STATUS_STEPS.map((step, i) => {
                   const done = i <= currentStep;
                   const last = i === STATUS_STEPS.length - 1;
@@ -99,18 +112,22 @@ export default function OrderTracking() {
                     <div key={step} className="flex items-center flex-1">
                       <div className="flex flex-col items-center">
                         <div
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                          style={done
-                            ? { backgroundColor: 'var(--color-primary)', color: '#fff' }
-                            : { backgroundColor: '#e2e8f0', color: '#94a3b8' }}
+                          className={`step-dot ${done ? 'done' : 'idle'}`}
+                          style={done ? { backgroundColor: 'var(--color-primary)' } : {}}
                         >
-                          {done ? '✓' : i + 1}
+                          {done ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          ) : (
+                            i + 1
+                          )}
                         </div>
-                        <span className="text-[10px] text-slate-500 mt-1 capitalize text-center">{step}</span>
+                        <span className="text-[10px] text-slate-500 mt-1.5 capitalize text-center leading-tight max-w-[3.5rem]">{step}</span>
                       </div>
                       {!last && (
                         <div
-                          className="h-0.5 flex-1 mx-1"
+                          className="h-0.5 flex-1 mx-1 -mt-5"
                           style={{ backgroundColor: i < currentStep ? 'var(--color-primary)' : '#e2e8f0' }}
                         />
                       )}
@@ -122,24 +139,30 @@ export default function OrderTracking() {
           )}
 
           {/* Items */}
-          <div className="p-5">
-            <p className="text-sm font-semibold text-slate-700 mb-3">Items</p>
+          <div className="px-5 py-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Items</p>
             {order.items?.map((item, i) => (
-              <div key={i} className="flex justify-between text-sm text-slate-600 mb-1">
-                <span>
+              <div key={i} className="flex justify-between text-sm text-slate-600 mb-1.5">
+                <span className="flex-1 min-w-0 truncate pr-3">
                   {item.product_name}
                   {item.variant_info ? ` (${item.variant_info})` : ''}
                   {item.quantity > 1 ? ` ×${item.quantity}` : ''}
                 </span>
-                <span>Rs. {parseFloat(item.total_price).toFixed(2)}</span>
+                <span className="font-medium shrink-0">Rs. {parseFloat(item.total_price).toFixed(2)}</span>
               </div>
             ))}
             <div className="border-t border-slate-100 mt-3 pt-3 flex justify-between font-bold">
               <span>Total</span>
-              <span className="text-primary">Rs. {parseFloat(order.total_amount).toFixed(2)}</span>
+              <span style={{ color: 'var(--color-primary)' }}>Rs. {parseFloat(order.total_amount).toFixed(2)}</span>
             </div>
             {order.tracking_number && (
-              <p className="mt-3 text-sm text-slate-500">Tracking #: <span className="font-mono font-medium">{order.tracking_number}</span></p>
+              <p className="mt-3 text-sm text-slate-500 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                  <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+                Tracking #: <span className="font-mono font-semibold text-slate-700">{order.tracking_number}</span>
+              </p>
             )}
           </div>
         </div>

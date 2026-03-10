@@ -82,7 +82,7 @@ export default function Checkout() {
 
   const field = (label, name, type = 'text', required = false) => (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">
+      <label className="block text-sm font-medium text-slate-700 mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
@@ -90,9 +90,7 @@ export default function Checkout() {
         name={name}
         value={form[name]}
         onChange={change}
-        className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
-          errors[name] ? 'border-red-400' : 'border-slate-200'
-        }`}
+        className={`input-field ${errors[name] ? 'error' : ''}`}
       />
       {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]}</p>}
     </div>
@@ -100,10 +98,20 @@ export default function Checkout() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-2">
+        <span>Cart</span>
+        <span>›</span>
+        <span className="text-slate-600 font-medium">Checkout</span>
+      </div>
       <h1 className="text-2xl font-bold text-slate-800 mb-6">Checkout</h1>
 
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 mb-4 text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 mb-5 text-sm flex items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
           {errors.general}
         </div>
       )}
@@ -114,8 +122,11 @@ export default function Checkout() {
         <div className="lg:col-span-2 space-y-5">
 
           {/* Customer info */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-            <h2 className="font-semibold text-slate-800 mb-4">Customer Info</h2>
+          <div className="bg-white rounded-xl p-5 border border-slate-100" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="step-dot done">1</div>
+              <h2 className="font-semibold text-slate-800">Customer Info</h2>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {field('Full Name', 'name', 'text', true)}
               {field('Phone', 'phone', 'tel', true)}
@@ -124,8 +135,11 @@ export default function Checkout() {
           </div>
 
           {/* Delivery address */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-            <h2 className="font-semibold text-slate-800 mb-4">Delivery Address</h2>
+          <div className="bg-white rounded-xl p-5 border border-slate-100" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="step-dot done">2</div>
+              <h2 className="font-semibold text-slate-800">Delivery Address</h2>
+            </div>
             <div className="space-y-3">
               {field('Address Line 1', 'line1', 'text', true)}
               {field('Address Line 2 (optional)', 'line2')}
@@ -141,17 +155,20 @@ export default function Checkout() {
           </div>
 
           {/* Payment method */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-            <h2 className="font-semibold text-slate-800 mb-4">Payment Method</h2>
+          <div className="bg-white rounded-xl p-5 border border-slate-100" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="step-dot done">3</div>
+              <h2 className="font-semibold text-slate-800">Payment Method</h2>
+            </div>
             <div className="space-y-2">
               {[
-                { value: 'cod', label: '💵 Cash on Delivery', desc: 'Pay when your order arrives.' },
-                ...(shop?.is_payment_enabled ? [{ value: 'online', label: '💳 Online Payment', desc: 'Pay securely online.' }] : []),
+                { value: 'cod', label: 'Cash on Delivery', desc: 'Pay when your order arrives.', icon: '💵' },
+                ...(shop?.is_payment_enabled ? [{ value: 'online', label: 'Online Payment', desc: 'Pay securely online.', icon: '💳' }] : []),
               ].map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
-                    form.payment_method === opt.value ? 'border-primary bg-blue-50/50' : 'border-slate-200'
+                  className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    form.payment_method === opt.value ? 'bg-blue-50/60' : 'border-slate-200 hover:border-slate-300 bg-white'
                   }`}
                   style={form.payment_method === opt.value ? { borderColor: 'var(--color-primary)' } : {}}
                 >
@@ -164,8 +181,8 @@ export default function Checkout() {
                     className="mt-0.5"
                   />
                   <div>
-                    <p className="font-medium text-slate-800 text-sm">{opt.label}</p>
-                    <p className="text-xs text-slate-500">{opt.desc}</p>
+                    <p className="font-semibold text-slate-800 text-sm">{opt.icon} {opt.label}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
                   </div>
                 </label>
               ))}
@@ -175,22 +192,28 @@ export default function Checkout() {
 
         {/* Right - Summary */}
         <div>
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 sticky top-20">
+          <div className="bg-white rounded-xl p-5 border border-slate-100 sticky top-20" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <h2 className="font-bold text-slate-800 text-lg mb-4">Order Summary</h2>
-            <div className="space-y-2 text-sm mb-4">
+            <div className="space-y-2 text-sm mb-4 max-h-48 overflow-y-auto pr-1">
               {items.map((item, i) => (
-                <div key={i} className="flex justify-between text-slate-600">
-                  <span className="truncate max-w-[160px]">
+                <div key={i} className="flex justify-between text-slate-600 gap-2">
+                  <span className="truncate text-xs">
                     {item.name}
                     {item.variantLabel ? ` (${item.variantLabel})` : ''}
                     {item.quantity > 1 ? ` ×${item.quantity}` : ''}
                   </span>
-                  <span>Rs. {(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="shrink-0 text-xs font-medium">Rs. {(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="border-t border-slate-100 pt-2 flex justify-between font-bold text-base">
+            </div>
+            <div className="border-t border-slate-100 pt-3 space-y-2 text-sm mb-5">
+              <div className="flex justify-between text-slate-600">
+                <span>Delivery</span>
+                <span className="text-green-600 font-medium">Free</span>
+              </div>
+              <div className="flex justify-between font-bold text-base">
                 <span>Total</span>
-                <span className="text-primary">Rs. {total.toFixed(2)}</span>
+                <span style={{ color: 'var(--color-primary)' }}>Rs. {total.toFixed(2)}</span>
               </div>
             </div>
             <button
@@ -198,8 +221,16 @@ export default function Checkout() {
               disabled={loading}
               className="btn-primary w-full py-3 text-base"
             >
-              {loading ? <span className="flex justify-center"><Spinner size="sm" /></span> : 'Place Order'}
+              {loading
+                ? <span className="flex justify-center"><Spinner size="sm" /></span>
+                : 'Place Order'}
             </button>
+            <p className="text-xs text-slate-400 text-center mt-3 flex items-center justify-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Your info is safe &amp; encrypted
+            </p>
           </div>
         </div>
       </form>

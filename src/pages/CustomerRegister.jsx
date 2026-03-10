@@ -47,46 +47,63 @@ export default function CustomerRegister() {
     }
   }
 
-  const field = (label, name, type = 'text') => (
+  const field = (label, name, type = 'text', placeholder = '') => (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
       <input
         type={type}
         name={name}
         value={form[name]}
         onChange={change}
-        className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
-          errors[name] ? 'border-red-400' : 'border-slate-200'
-        }`}
+        placeholder={placeholder}
+        className={`input-field ${errors[name] ? 'error' : ''}`}
       />
       {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]}</p>}
     </div>
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{ background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)' }}>
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+
+        {/* Shop branding */}
+        {shop && (
+          <div className="text-center mb-6">
+            {shop.logo_url ? (
+              <img src={shop.logo_url} alt={shop.name} className="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-white shadow-md" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-3xl mx-auto mb-2 shadow-md">🏪</div>
+            )}
+            <p className="text-sm text-slate-500">{shop.name}</p>
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl border border-slate-100 p-8" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.09)' }}>
           <h1 className="text-2xl font-bold text-slate-800 mb-1">Create account</h1>
-          <p className="text-slate-500 text-sm mb-6">Shop faster with an account</p>
+          <p className="text-slate-400 text-sm mb-6">Shop faster with an account</p>
 
           {errors.general && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 mb-4 text-sm">{errors.general}</div>
+            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 mb-4 text-sm flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {errors.general}
+            </div>
           )}
 
           <form onSubmit={submit} className="space-y-4">
-            {field('Full Name', 'name')}
-            {field('Email', 'email', 'email')}
-            {field('Phone (optional)', 'phone', 'tel')}
-            {field('Password', 'password', 'password')}
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3">
+            {field('Full Name', 'name', 'text', 'John Doe')}
+            {field('Email', 'email', 'email', 'you@example.com')}
+            {field('Phone (optional)', 'phone', 'tel', '+91 98765 43210')}
+            {field('Password', 'password', 'password', '••••••••')}
+            <button type="submit" disabled={loading} className="btn-primary w-full py-3 mt-1">
               {loading ? <span className="flex justify-center"><Spinner size="sm" /></span> : 'Create Account'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-5">
+          <p className="text-center text-sm text-slate-400 mt-5">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>
+            <Link to="/login" className="font-semibold hover:underline" style={{ color: 'var(--color-primary)' }}>Sign in</Link>
           </p>
         </div>
       </div>

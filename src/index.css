@@ -11,10 +11,12 @@
 /* ── Base reset ────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
   font-family: var(--font-family, 'Inter', system-ui, sans-serif);
-  background-color: #f8fafc;
+  background-color: #f1f5f9;
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
 }
@@ -30,10 +32,19 @@ a { text-decoration: none; color: inherit; }
   border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
-.btn-primary:hover  { background-color: var(--color-primary-dark); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary:hover  {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.35);
+}
+.btn-primary:active { transform: translateY(0); box-shadow: none; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-outline {
   background: transparent;
@@ -44,11 +55,19 @@ a { text-decoration: none; color: inherit; }
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 .btn-outline:hover {
   background-color: var(--color-primary);
   color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.25);
 }
+.btn-outline:active { transform: translateY(0); box-shadow: none; }
+.btn-outline:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .text-primary  { color: var(--color-primary); }
 .bg-primary    { background-color: var(--color-primary); }
@@ -89,3 +108,116 @@ a { text-decoration: none; color: inherit; }
 .badge-red    { background: #fee2e2; color: #991b1b; }
 .badge-blue   { background: #dbeafe; color: #1e40af; }
 .badge-gray   { background: #f1f5f9; color: #475569; }
+
+/* ── Section heading with accent underline ───────────────────────────── */
+.section-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 2.5rem;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--color-primary);
+}
+
+/* ── Feature / info cards ────────────────────────────────────────────── */
+.feature-card {
+  background: white;
+  border-radius: 0.875rem;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.feature-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+  transform: translateY(-2px);
+}
+
+/* ── Product card quick-add overlay ──────────────────────────────────── */
+.product-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.22s;
+  border-radius: 0;
+}
+.group:hover .product-overlay { opacity: 1; }
+
+/* ── Input field ──────────────────────────────────────────────────────── */
+.input-field {
+  width: 100%;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+  outline: none;
+  color: #1e293b;
+}
+.input-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
+}
+.input-field.error { border-color: #f87171; }
+
+/* ── Category pill ───────────────────────────────────────────────────── */
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1.1rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.82rem;
+  transition: all 0.18s;
+  background: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cat-pill:hover, .cat-pill.active {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* ── Announcement bar ─────────────────────────────────────────────────── */
+.announce-bar {
+  background-color: var(--color-primary-dark, #1d4ed8);
+  color: white;
+  text-align: center;
+  padding: 0.35rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ── Step tracker (checkout / order) ─────────────────────────────────── */
+.step-dot {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.step-dot.done  { background-color: var(--color-primary); color: white; }
+.step-dot.active { background-color: var(--color-primary); color: white; box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.2); }
+.step-dot.idle  { background-color: #e2e8f0; color: #94a3b8; }

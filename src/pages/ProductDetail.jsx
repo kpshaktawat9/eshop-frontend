@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getProduct } from '../api/productApi';
 import Spinner from '../components/ui/Spinner';
 import { useCart } from '../context/CartContext';
@@ -85,19 +85,36 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <button onClick={() => navigate(-1)} className="text-sm text-slate-500 hover:text-primary mb-6 flex items-center gap-1">
-        ← Back
-      </button>
+
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-6">
+        <Link to="/" className="hover:text-slate-600 transition-colors">Home</Link>
+        <span>›</span>
+        <Link to="/products" className="hover:text-slate-600 transition-colors">Products</Link>
+        {product.category && (
+          <>
+            <span>›</span>
+            <Link to={`/products?category_id=${product.category.id}`} className="hover:text-slate-600 transition-colors">
+              {product.category.name}
+            </Link>
+          </>
+        )}
+        <span>›</span>
+        <span className="text-slate-600 font-medium truncate max-w-[180px]">{product.name}</span>
+      </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
         {/* Images */}
         <div>
-          <div className="rounded-2xl overflow-hidden bg-slate-100 aspect-square mb-3">
+          <div
+            className="rounded-2xl overflow-hidden bg-white aspect-square mb-3 border border-slate-100"
+            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
+          >
             {images.length > 0 ? (
               <img src={images[selectedImg]} alt={product.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-300 text-6xl">📦</div>
+              <div className="w-full h-full flex items-center justify-center text-slate-200 text-7xl">📦</div>
             )}
           </div>
           {images.length > 1 && (
@@ -106,8 +123,8 @@ export default function ProductDetail() {
                 <button
                   key={i}
                   onClick={() => setSelectedImg(i)}
-                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition ${
-                    i === selectedImg ? 'border-primary' : 'border-transparent'
+                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                    i === selectedImg ? 'shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                   style={i === selectedImg ? { borderColor: 'var(--color-primary)' } : {}}
                 >
@@ -121,20 +138,31 @@ export default function ProductDetail() {
         {/* Details */}
         <div>
           {product.category && (
-            <p className="text-sm text-slate-400 mb-1">{product.category.name}</p>
+            <Link
+              to={`/products?category_id=${product.category.id}`}
+              className="inline-block text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors mb-3"
+            >
+              {product.category.name}
+            </Link>
           )}
-          <h1 className="text-2xl font-bold text-slate-800 mb-3">{product.name}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-3 leading-tight">{product.name}</h1>
 
           {/* Price */}
-          <div className="text-3xl font-bold text-primary mb-4">
+          <div
+            className="text-3xl font-extrabold mb-3"
+            style={{ color: 'var(--color-primary)' }}
+          >
             Rs. {parseFloat(price).toFixed(2)}
           </div>
 
           {/* Stock */}
           {stock !== null && (
-            <p className={`text-sm mb-4 font-medium ${inStock ? 'text-green-600' : 'text-red-500'}`}>
-              {inStock ? `✓ In Stock${stock < 10 ? ` (${stock} left)` : ''}` : '✗ Out of Stock'}
-            </p>
+            <div className={`inline-flex items-center gap-1.5 text-sm mb-4 font-medium px-3 py-1 rounded-full ${
+              inStock ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${inStock ? 'bg-green-500' : 'bg-red-500'}`} />
+              {inStock ? `In Stock${stock < 10 ? ` — only ${stock} left` : ''}` : 'Out of Stock'}
+            </div>
           )}
 
           {/* Variant selectors */}
@@ -146,10 +174,10 @@ export default function ProductDetail() {
                   <button
                     key={val.id}
                     onClick={() => selectAttr(attr.id, val.id)}
-                    className={`px-4 py-1.5 rounded-full border-2 text-sm font-medium transition ${
+                    className={`px-4 py-1.5 rounded-full border-2 text-sm font-medium transition-all ${
                       selectedAttrs[attr.id] === val.id
-                        ? 'text-white border-transparent'
-                        : 'border-slate-200 text-slate-600 hover:border-primary'
+                        ? 'text-white shadow-sm'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
                     }`}
                     style={
                       selectedAttrs[attr.id] === val.id
@@ -166,11 +194,17 @@ export default function ProductDetail() {
 
           {/* Quantity */}
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-sm font-semibold text-slate-700">Qty:</span>
-            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-3 py-2 text-lg hover:bg-slate-50">−</button>
-              <span className="px-4 py-2 font-medium border-x border-slate-200">{qty}</span>
-              <button onClick={() => setQty((q) => q + 1)} className="px-3 py-2 text-lg hover:bg-slate-50">+</button>
+            <span className="text-sm font-semibold text-slate-700">Quantity:</span>
+            <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <button
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                className="px-3.5 py-2.5 text-lg hover:bg-slate-50 transition-colors font-medium text-slate-600"
+              >−</button>
+              <span className="px-5 py-2.5 font-semibold border-x border-slate-200 text-slate-800 min-w-[2.5rem] text-center">{qty}</span>
+              <button
+                onClick={() => setQty((q) => q + 1)}
+                className="px-3.5 py-2.5 text-lg hover:bg-slate-50 transition-colors font-medium text-slate-600"
+              >+</button>
             </div>
           </div>
 
@@ -178,30 +212,52 @@ export default function ProductDetail() {
           <button
             onClick={handleAddToCart}
             disabled={!inStock || (product.has_variant && !allAttrsSelected)}
-            className="btn-primary w-full py-3 text-base mb-3"
+            className="btn-primary w-full py-3.5 text-base mb-3"
           >
             {!inStock
               ? 'Out of Stock'
               : product.has_variant && !allAttrsSelected
-              ? 'Select Options'
+              ? 'Select Options First'
               : added
               ? '✓ Added to Cart!'
-              : 'Add to Cart'}
+              : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                  Add to Cart
+                </>
+              )}
           </button>
 
           <button
             onClick={() => { handleAddToCart(); navigate('/cart'); }}
             disabled={!inStock || (product.has_variant && !allAttrsSelected)}
-            className="btn-outline w-full py-3 text-base"
+            className="btn-outline w-full py-3.5 text-base"
           >
             Buy Now
           </button>
 
+          {/* Trust badges */}
+          <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
+            {[
+              { icon: '🚚', text: 'Free Delivery' },
+              { icon: '🔒', text: 'Secure Payment' },
+              { icon: '↩️', text: 'Easy Returns' },
+            ].map((b) => (
+              <div key={b.text} className="text-xs text-slate-500">
+                <span className="text-lg block mb-0.5">{b.icon}</span>
+                {b.text}
+              </div>
+            ))}
+          </div>
+
           {/* Description */}
           {product.description && (
-            <div className="mt-6 pt-6 border-t border-slate-100">
-              <h3 className="font-semibold text-slate-700 mb-2">Description</h3>
-              <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">{product.description}</p>
+            <div className="mt-5 pt-5 border-t border-slate-100">
+              <h3 className="font-semibold text-slate-700 mb-2">Product Description</h3>
+              <p className="text-slate-500 text-sm leading-relaxed whitespace-pre-line">{product.description}</p>
             </div>
           )}
         </div>
