@@ -13,7 +13,11 @@ export default function DealsSlider({ deals }) {
 
   function handleClick(deal) {
     if (!deal.link_url) return;
-    navigate(deal.link_url);
+    if (deal.link_url.startsWith('http')) {
+      window.open(deal.link_url, '_blank');
+    } else {
+      navigate(deal.link_url);
+    }
   }
 
   return (

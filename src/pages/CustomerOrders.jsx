@@ -27,7 +27,7 @@ export default function CustomerOrders() {
       .then((r) => setOrders(r.data.data || []))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [shop, isLoggedIn]);
+  }, [shop, isLoggedIn, navigate]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

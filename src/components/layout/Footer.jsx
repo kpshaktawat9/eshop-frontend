@@ -89,7 +89,7 @@ export default function Footer() {
                 <span>{shop.contact_number}</span>
               </li>
             )}
-            {shop?.whatsapp_number && (
+            {shop?.whatsapp_number && shop.whatsapp_number.replace(/\D/g, '') && (
               <li>
                 <a
                   href={`https://wa.me/${shop.whatsapp_number.replace(/\D/g, '')}`}

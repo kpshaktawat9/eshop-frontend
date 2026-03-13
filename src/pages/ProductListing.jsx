@@ -18,6 +18,10 @@ export default function ProductListing() {
   const categoryId = searchParams.get('category_id') || '';
   const page = parseInt(searchParams.get('page') || '1', 10);
 
+  // Controlled local input state — syncs with URL param so external nav updates the box
+  const [inputSearch, setInputSearch] = useState(search);
+  useEffect(() => { setInputSearch(search); }, [search]);
+
   useEffect(() => {
     if (!shop) return;
     getCategories(shop.id).then((r) => setCategories(r.data.data || []));
@@ -94,9 +98,10 @@ export default function ProductListing() {
             <input
               type="text"
               placeholder="Search products..."
-              defaultValue={search}
-              onKeyDown={(e) => { if (e.key === 'Enter') setParam('search', e.target.value); }}
-              onBlur={(e) => setParam('search', e.target.value)}
+              value={inputSearch}
+              onChange={(e) => setInputSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') setParam('search', inputSearch); }}
+              onBlur={() => setParam('search', inputSearch)}
               className="input-field pl-9"
             />
           </div>

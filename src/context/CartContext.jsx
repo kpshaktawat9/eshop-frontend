@@ -5,22 +5,23 @@ const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const { shop } = useShop();
-  const [items, setItems] = useState([]);
-
   const storageKey = shop ? `cart_${shop.id}` : null;
 
-  // Load cart from localStorage when shop is known
-  useEffect(() => {
-    if (!storageKey) return;
+  // Lazy initialiser — reads localStorage synchronously on first render.
+  // This avoids the React 18 StrictMode race condition where a separate
+  // "save" effect would overwrite localStorage with [] before the "load"
+  // effect's setState was processed, causing cart wipe on every refresh.
+  const [items, setItems] = useState(() => {
+    if (!storageKey) return [];
     try {
       const saved = localStorage.getItem(storageKey);
-      if (saved) setItems(JSON.parse(saved));
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      setItems([]);
+      return [];
     }
-  }, [storageKey]);
+  });
 
-  // Save cart to localStorage on every change
+  // Persist cart to localStorage on every change
   useEffect(() => {
     if (!storageKey) return;
     localStorage.setItem(storageKey, JSON.stringify(items));

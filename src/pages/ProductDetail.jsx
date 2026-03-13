@@ -105,26 +105,16 @@ export default function ProductDetail() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        {/* Images */}
-        <div>
-          <div
-            className="rounded-2xl overflow-hidden bg-white aspect-square mb-3 border border-slate-100"
-            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
-          >
-            {images.length > 0 ? (
-              <img src={images[selectedImg]} alt={product.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-200 text-7xl">📦</div>
-            )}
-          </div>
+        {/* Images — Myntra-style: vertical thumbnail strip on left, main image on right */}
+        <div className="flex gap-3">
           {images.length > 1 && (
-            <div className="flex gap-2 flex-wrap">
+            <div className="hidden sm:flex flex-col gap-2 flex-shrink-0">
               {images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedImg(i)}
-                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                    i === selectedImg ? 'shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
+                  className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                    i === selectedImg ? 'shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                   style={i === selectedImg ? { borderColor: 'var(--color-primary)' } : {}}
                 >
@@ -133,6 +123,35 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+          <div className="flex-1 min-w-0">
+            <div
+              className="rounded-2xl overflow-hidden bg-white aspect-square border border-slate-100"
+              style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
+            >
+              {images.length > 0 ? (
+                <img src={images[selectedImg]} alt={product.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-200 text-7xl">📦</div>
+              )}
+            </div>
+            {/* Mobile thumbnails below main image */}
+            {images.length > 1 && (
+              <div className="flex sm:hidden gap-2 mt-2 flex-wrap">
+                {images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImg(i)}
+                    className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                      i === selectedImg ? 'shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                    style={i === selectedImg ? { borderColor: 'var(--color-primary)' } : {}}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Details */}
@@ -242,12 +261,12 @@ export default function ProductDetail() {
           {/* Trust badges */}
           <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
             {[
-              { icon: '🚚', text: 'Free Delivery' },
-              { icon: '🔒', text: 'Secure Payment' },
-              { icon: '↩️', text: 'Easy Returns' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>, text: 'Free Delivery' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, text: 'Secure Payment' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>, text: 'Easy Returns' },
             ].map((b) => (
               <div key={b.text} className="text-xs text-slate-500">
-                <span className="text-lg block mb-0.5">{b.icon}</span>
+                <span className="block mb-1 text-slate-400">{b.icon}</span>
                 {b.text}
               </div>
             ))}

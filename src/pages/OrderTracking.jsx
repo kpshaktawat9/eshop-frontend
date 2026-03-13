@@ -4,7 +4,7 @@ import { trackOrder } from '../api/orderApi';
 import Spinner from '../components/ui/Spinner';
 import { useShop } from '../context/ShopContext';
 
-const STATUS_STEPS = ['pending', 'CONFIRMED', 'processing', 'shipped', 'delivered'];
+const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
 // const STATUS_STEPS = ['PENDING', 'CONFIRMED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'RETURN_REQUESTED', 'RETURNED', 'REFUNDED'];
 
 function statusBadge(status) {
@@ -28,9 +28,10 @@ export default function OrderTracking() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!shop) return;
     const n = searchParams.get('number');
     if (n) { setNumber(n); fetchOrder(n); }
-  }, []);
+  }, [shop]);
 
   async function fetchOrder(n) {
     if (!shop || !n.trim()) return;
