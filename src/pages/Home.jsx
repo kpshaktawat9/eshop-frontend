@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCarousels, getCategories, getDeals, getProducts } from '../api/productApi';
+import CategoryBrowser from '../components/ui/CategoryBrowser';
 import DealsSlider from '../components/ui/DealsSlider';
 import ImageCarousel from '../components/ui/ImageCarousel';
 import ProductCard from '../components/ui/ProductCard';
@@ -64,8 +65,6 @@ export default function Home() {
       </div>
     );
   }
-
-  const topCats = categories.filter((c) => !c.parent_id);
 
   return (
     <div className="bg-gray-50">
@@ -132,7 +131,7 @@ export default function Home() {
         {deals.length > 0 && <DealsSlider deals={deals} />}
 
         {/* Shop by Category */}
-        {topCats.length > 0 && (
+        {categories.length > 0 && (
           <section className="mt-10">
             <div className="flex items-center justify-between mb-5">
               <h2 className="section-title">Shop by Category</h2>
@@ -140,44 +139,7 @@ export default function Home() {
                 View All →
               </Link>
             </div>
-
-            {topCats.some((c) => c.image_url) ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                <Link to="/products" className="group flex flex-col items-center gap-2">
-                  <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-3xl border-2 border-transparent group-hover:shadow-md transition-all" style={{ '--tw-border-opacity': 1 }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}
-                  >
-                    🛍️
-                  </div>
-                  <span className="text-xs font-semibold text-slate-600 text-center">All</span>
-                </Link>
-                {topCats.map((cat) => (
-                  <Link key={cat.id} to={`/products?category_id=${cat.id}`} className="group flex flex-col items-center gap-2">
-                    <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-transparent group-hover:shadow-md transition-all"
-                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}
-                    >
-                      {cat.image_url ? (
-                        <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center text-2xl">🏷️</div>
-                      )}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-600 text-center leading-tight line-clamp-2 px-1">{cat.name}</span>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="flex gap-2.5 flex-wrap">
-                <Link to="/products"><span className="cat-pill active">All</span></Link>
-                {topCats.map((cat) => (
-                  <Link key={cat.id} to={`/products?category_id=${cat.id}`}>
-                    <span className="cat-pill">{cat.name}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <CategoryBrowser categories={categories} />
           </section>
         )}
 

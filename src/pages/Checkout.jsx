@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { initiatePayment } from '../api/paymentApi';
 import { placeOrder } from '../api/orderApi';
 import Spinner from '../components/ui/Spinner';
 import { useAuth } from '../context/AuthContext';
@@ -70,6 +71,15 @@ export default function Checkout() {
       };
 
       const { data } = await placeOrder(shop.id, payload);
+
+      if (form.payment_method === 'online') {
+        // Initiate gateway payment — will redirect browser to PhonePe / mock page
+        clearCart();
+        const { data: payData } = await initiatePayment(shop.id, data.order.id);
+        window.location.href = payData.gateway_redirect_url;
+        return;
+      }
+
       clearCart();
       navigate(`/order-confirmation/${data.order_number}`, { state: { order: data.order } });
     } catch (err) {

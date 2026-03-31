@@ -16,6 +16,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [hoveredCat, setHoveredCat] = useState(null);
+  const [hoveredNavCat, setHoveredNavCat] = useState(null);
+  const [hoveredSubCat, setHoveredSubCat] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const catRef = useRef(null);
@@ -182,7 +184,7 @@ export default function Navbar() {
       {/* ── Category nav bar (desktop) ── */}
       <div className="hidden sm:block border-t border-slate-100" style={{ backgroundColor: '#fafafa' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-0 text-sm font-medium overflow-x-auto">
+          <div className="flex items-center gap-0 text-sm font-medium">
 
             {/* Home */}
             <Link
@@ -259,18 +261,108 @@ export default function Navbar() {
               <Link to="/products" className="px-4 py-2.5 text-slate-600 hover:text-slate-900 whitespace-nowrap border-b-2 border-transparent hover:border-slate-300 transition-all">Products</Link>
             )}
 
-            {/* Direct category links (top 5) */}
+            {/* Direct category links (top 5) — with waterfall mega menu on hover */}
             {topCategories.slice(0, 5).map((cat) => (
-              <Link
+              <div
                 key={cat.id}
-                to={`/products?category_id=${cat.id}`}
-                className="px-4 py-2.5 text-slate-600 hover:text-slate-900 whitespace-nowrap border-b-2 border-transparent transition-all"
-                style={{ borderBottomColor: 'transparent' }}
-                onMouseEnter={e => e.currentTarget.style.borderBottomColor = 'var(--color-primary)'}
-                onMouseLeave={e => e.currentTarget.style.borderBottomColor = 'transparent'}
+                className="relative"
+                onMouseEnter={() => setHoveredNavCat(cat.id)}
+                onMouseLeave={() => setHoveredNavCat(null)}
               >
-                {cat.name}
-              </Link>
+                <Link
+                  to={`/products?category_id=${cat.id}`}
+                  className="flex items-center gap-1 px-4 py-2.5 text-slate-600 hover:text-slate-900 whitespace-nowrap border-b-2 transition-all"
+                  style={{ borderBottomColor: hoveredNavCat === cat.id ? 'var(--color-primary)' : 'transparent' }}
+                >
+                  {cat.name}
+                  {cat.children?.length > 0 && (
+                    <svg className={`w-3 h-3 text-slate-400 transition-transform ${hoveredNavCat === cat.id ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  )}
+                </Link>
+
+                {/* Waterfall panel — L2 list */}
+                {cat.children?.length > 0 && hoveredNavCat === cat.id && (
+                  <div
+                    className="absolute left-0 top-full bg-white border border-slate-100 z-50 rounded-b-xl"
+                    style={{ minWidth: '220px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
+                    onMouseLeave={() => setHoveredSubCat(null)}
+                  >
+                    <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/80">
+                      <Link
+                        to={`/products?category_id=${cat.id}`}
+                        className="text-xs font-bold uppercase tracking-wider hover:underline"
+                        style={{ color: 'var(--color-primary)' }}
+                      >
+                        All {cat.name} →
+                      </Link>
+                    </div>
+                    <div className="py-1">
+                      {cat.children.map((child) => (
+                        <div
+                          key={child.id}
+                          className="relative"
+                          onMouseEnter={() => setHoveredSubCat(child.id)}
+                        >
+                          <Link
+                            to={`/products?category_id=${child.id}`}
+                            className={`flex items-center gap-3 px-3 py-2 text-sm transition-colors ${hoveredSubCat === child.id ? 'bg-slate-50 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                          >
+                            {/* Thumbnail */}
+                            <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                              {child.image_url
+                                ? <img src={child.image_url} alt={child.name} className="w-full h-full object-cover" />
+                                : <div className="w-full h-full flex items-center justify-center text-base">🏷️</div>
+                              }
+                            </div>
+                            <span className="flex-1 font-medium">{child.name}</span>
+                            {child.children?.length > 0 && (
+                              <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <polyline points="9 18 15 12 9 6" />
+                              </svg>
+                            )}
+                          </Link>
+
+                          {/* L3 flyout — appears to the right */}
+                          {child.children?.length > 0 && hoveredSubCat === child.id && (
+                            <div
+                              className="absolute left-full top-0 ml-px bg-white border border-slate-100 rounded-xl z-50 py-1"
+                              style={{ minWidth: '200px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
+                            >
+                              <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/80">
+                                <Link
+                                  to={`/products?category_id=${child.id}`}
+                                  className="text-xs font-bold uppercase tracking-wider hover:underline"
+                                  style={{ color: 'var(--color-primary)' }}
+                                >
+                                  All {child.name} →
+                                </Link>
+                              </div>
+                              {child.children.map((grand) => (
+                                <Link
+                                  key={grand.id}
+                                  to={`/products?category_id=${grand.id}`}
+                                  className="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                                >
+                                  {/* Thumbnail */}
+                                  <div className="w-8 h-8 rounded-md overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                                    {grand.image_url
+                                      ? <img src={grand.image_url} alt={grand.name} className="w-full h-full object-cover" />
+                                      : <div className="w-full h-full flex items-center justify-center text-sm">🏷️</div>
+                                    }
+                                  </div>
+                                  {grand.name}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
 
             <Link to="/track-order" className="px-4 py-2.5 text-slate-600 hover:text-slate-900 whitespace-nowrap border-b-2 border-transparent hover:border-slate-300 transition-all ml-auto">

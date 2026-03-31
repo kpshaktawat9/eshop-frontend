@@ -8,3 +8,6 @@ export const trackOrder = (shopId, orderNumber) =>
 
 export const getMyOrders = (shopId) =>
   api.get(`/storefront/${shopId}/customer/orders`);
+
+export const getLiveTracking = (shopId, awb) =>
+  api.get(`/storefront/${shopId}/tracking/${awb}`);

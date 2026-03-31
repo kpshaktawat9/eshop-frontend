@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { trackOrder } from '../api/orderApi';
+import { getLiveTracking, trackOrder } from '../api/orderApi';
 import Spinner from '../components/ui/Spinner';
 import { useShop } from '../context/ShopContext';
 
 const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
-// const STATUS_STEPS = ['PENDING', 'CONFIRMED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'RETURN_REQUESTED', 'RETURNED', 'REFUNDED'];
 
 function statusBadge(status) {
   const map = {
@@ -26,6 +25,8 @@ export default function OrderTracking() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [liveTracking, setLiveTracking] = useState(null);
+  const [liveLoading, setLiveLoading] = useState(false);
 
   useEffect(() => {
     if (!shop) return;
@@ -37,14 +38,34 @@ export default function OrderTracking() {
     if (!shop || !n.trim()) return;
     setLoading(true);
     setError(null);
+    setLiveTracking(null);
     try {
       const { data } = await trackOrder(shop.id, n.trim());
-      setOrder(data.data);
+      const orderData = data.data;
+      setOrder(orderData);
+      // Auto-fetch live tracking if AWB is available
+      if (orderData?.shiprocket_awb) {
+        fetchLiveTracking(orderData.shiprocket_awb);
+      }
     } catch {
       setError('Order not found. Please check the order number.');
       setOrder(null);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchLiveTracking(awb) {
+    if (!shop || !awb) return;
+    setLiveLoading(true);
+    try {
+      const { data } = await getLiveTracking(shop.id, awb);
+      setLiveTracking(data.data);
+    } catch {
+      // Silently fail — fall back to static progress bar
+      setLiveTracking(null);
+    } finally {
+      setLiveLoading(false);
     }
   }
 
@@ -102,8 +123,67 @@ export default function OrderTracking() {
             <span className={`badge ${statusBadge(order.status)} capitalize`}>{order.status}</span>
           </div>
 
-          {/* Progress tracker */}
-          {order.status !== 'cancelled' && (
+          {/* Live Shiprocket Tracking */}
+          {order.shiprocket_awb && (
+            <div className="px-5 py-5 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Live Tracking</p>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-600 bg-green-50 border border-green-100 rounded-full px-2 py-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                  LIVE
+                </span>
+              </div>
+
+              {liveLoading && (
+                <div className="flex justify-center py-4"><Spinner size="sm" /></div>
+              )}
+
+              {!liveLoading && liveTracking && (
+                <>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm font-semibold text-slate-700">{liveTracking.current_status}</span>
+                    {liveTracking.etd && (
+                      <span className="text-xs text-slate-400">· Est. delivery: {liveTracking.etd}</span>
+                    )}
+                  </div>
+                  {liveTracking.activities?.length > 0 ? (
+                    <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                      {liveTracking.activities.map((act, i) => (
+                        <div key={i} className="flex gap-3 text-sm">
+                          <div className="flex flex-col items-center">
+                            <div
+                              className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+                              style={{ backgroundColor: i === 0 ? 'var(--color-primary)' : '#cbd5e1' }}
+                            />
+                            {i < liveTracking.activities.length - 1 && (
+                              <div className="w-px flex-1 bg-slate-200 mt-1" />
+                            )}
+                          </div>
+                          <div className="pb-3">
+                            <p className="font-medium text-slate-700">{act.activity}</p>
+                            {act.location && <p className="text-xs text-slate-400">{act.location}</p>}
+                            <p className="text-xs text-slate-400">{act.date}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">No activity events yet.</p>
+                  )}
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    AWB: <span className="font-mono">{order.shiprocket_awb}</span>
+                  </p>
+                </>
+              )}
+
+              {!liveLoading && !liveTracking && (
+                <p className="text-sm text-slate-400">Tracking info not available yet.</p>
+              )}
+            </div>
+          )}
+
+          {/* Static progress tracker (shown when no live tracking) */}
+          {!order.shiprocket_awb && order.status !== 'cancelled' && (
             <div className="px-5 py-6 border-b border-slate-100">
               <div className="flex items-center">
                 {STATUS_STEPS.map((step, i) => {
@@ -156,7 +236,7 @@ export default function OrderTracking() {
               <span>Total</span>
               <span style={{ color: 'var(--color-primary)' }}>Rs. {parseFloat(order.total_amount).toFixed(2)}</span>
             </div>
-            {order.tracking_number && (
+            {order.tracking_number && !order.shiprocket_awb && (
               <p className="mt-3 text-sm text-slate-500 flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>

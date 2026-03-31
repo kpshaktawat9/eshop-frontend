@@ -12,6 +12,7 @@ import CustomerOrders from './pages/CustomerOrders';
 import CustomerRegister from './pages/CustomerRegister';
 import Home from './pages/Home';
 import OrderConfirmation from './pages/OrderConfirmation';
+import PaymentReturn from './pages/PaymentReturn';
 import OrderTracking from './pages/OrderTracking';
 import ProductDetail from './pages/ProductDetail';
 import ProductListing from './pages/ProductListing';
@@ -60,6 +61,7 @@ function AppRoutes() {
                 <Route path="/login"                          element={<CustomerLogin />} />
                 <Route path="/register"                       element={<CustomerRegister />} />
                 <Route path="/account/orders"                 element={<CustomerOrders />} />
+                <Route path="/payment-return"                 element={<PaymentReturn />} />
               </Routes>
             </main>
             <Footer />
